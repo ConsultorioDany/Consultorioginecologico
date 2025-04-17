@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda de Citas - Ginecología</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .bg-pink {
+            background-color: #ffc0cb; /* Fondo rosa */
+        }
+    </style>
+</head>
+<body class="bg-pink p-6">
+    <!-- Logotipo en pantalla principal -->
+    <div class="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-lg text-center">
+        <img src="https://via.placeholder.com/150" alt="Logotipo de Consultorio" class="mx-auto mb-4"> <!-- Cambia la URL del logo -->
+        <h1 class="text-2xl font-bold mb-4">Bienvenida a la agenda de citas</h1>
+        <p>Por favor, inicia sesión para continuar.</p>
+
+        <!-- Autenticación -->
+        <div id="auth-section">
+            <input type="email" id="email" placeholder="Correo electrónico" class="w-full border p-2 rounded mb-2">
+            <input type="password" id="pin" placeholder="PIN de acceso" class="w-full border p-2 rounded mb-2">
+            <button id="login-btn" class="bg-green-500 text-white p-2 rounded w-full mt-2">Iniciar sesión</button>
+        </div>
+    </div>
+
+    <!-- Agenda -->
+    <div id="appointment-section" class="hidden bg-pink p-6">
+        <div class="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-lg">
+            <!-- Logotipo -->
+            <img src="https://via.placeholder.com/150" alt="Logotipo de Consultorio" class="mx-auto mb-4"> <!-- Cambia la URL del logo -->
+            <h2 class="text-lg font-semibold text-center mb-4">Agenda tu consulta</h2>
+
+            <!-- Vista previa de disponibilidad -->
+            <h3 class="text-gray-700 font-medium mb-2">Disponibilidad:</h3>
+            <div id="availability" class="text-gray-600 mb-4"></div>
+
+            <!-- Formulario -->
+            <form id="appointment-form" class="space-y-4">
+                <input type="text" id="name" placeholder="Nombre completo" required class="w-full border p-2 rounded">
+                <input type="number" id="age" placeholder="Edad" required class="w-full border p-2 rounded">
+                <input type="tel" id="phone" placeholder="Número de teléfono" required class="w-full border p-2 rounded">
+                <textarea id="reason" placeholder="Razón de la consulta" required class="w-full border p-2 rounded"></textarea>
+
+                <label for="date">Selecciona fecha:</label>
+                <input type="date" id="date" required class="w-full border p-2 rounded">
+
+                <label for="time">Selecciona hora:</label>
+                <select id="time" required class="w-full border p-2 rounded"></select>
+
+                <button type="submit" class="bg-blue-500 text-white p-2 rounded w-full">Agendar cita</button>
+            </form>
+
+            <div id="confirmation-message" class="hidden text-green-500 text-center mt-4"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const timeSelect = document.getElementById("time");
+            const availabilityDiv = document.getElementById("availability");
+
+            let storedAppointments = JSON.parse(localStorage.getItem("appointments")) || [];
+
+            function updateAvailability() {
+                let availabilityText = "Horarios disponibles: ";
+                for (let hour = 9.5; hour < 18.5; hour += 0.5) {
+                    let formattedTime = `${Math.floor(hour)}:${hour % 1 === 0 ? "00" : "30"}`;
+                    if (!storedAppointments.includes(formattedTime)) {
+                        availabilityText += `${formattedTime}, `;
+                    }
+                }
+                availabilityDiv.textContent = availabilityText.slice(0, -2);
+            }
+
+            for (let hour = 9.5; hour < 18.5; hour += 0.5) {
+                let formattedTime = `${Math.floor(hour)}:${hour % 1 === 0 ? "00" : "30"}`;
+                let option = document.createElement("option");
+                option.value = formattedTime;
+                option.textContent = formattedTime;
+                timeSelect.appendChild(option);
+            }
+
+            updateAvailability();
+
+            document.getElementById("login-btn").addEventListener("click", () => {
+                document.getElementById("auth-section").classList.add("hidden");
+                document.getElementById("appointment-section").classList.remove("hidden");
+            });
+
+            document.getElementById("appointment-form").addEventListener("submit", (e) => {
+                e.preventDefault();
+                const name = document.getElementById("name").value;
+                const age = parseInt(document.getElementById("age").value);
+                const date = document.getElementById("date").value;
+                const time = document.getElementById("time").value;
+
+                if (age < 15 || age > 70) {
+                    alert("Solo pueden agendar mujeres entre 15 y 70 años.");
+                    return;
+                }
+
+                let storedAppointments = JSON.parse(localStorage.getItem("appointments")) || [];
+                storedAppointments.push(time);
+                localStorage.setItem("appointments", JSON.stringify(storedAppointments));
+
+                document.getElementById("confirmation-message").textContent = "¡Cita agendada exitosamente!";
+                document.getElementById("confirmation-message").classList.remove("hidden");
+
+                updateAvailability();
+            });
+        });
+    </script>
+</body>
+</html>
